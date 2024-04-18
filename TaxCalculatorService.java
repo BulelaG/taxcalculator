@@ -1,13 +1,12 @@
-// TaxCalculatorService.java
 public class TaxCalculatorService {
-    // Method to calculate tax obligation based on income
-    public static double calculateTax(double income) {
+    // Method to calculate tax obligation based on income and age group for 2024 tax year
+    public static double calculateTax(double income, int ageGroup) {
         // Validate input income
         if (income <= 0) {
             throw new IllegalArgumentException("Income must be positive.");
         }
 
-        // Get tax brackets and rates
+        // Get tax brackets and rates for 2024 tax year
         double[] brackets = TaxRates.getTaxBrackets();
         double[] rates = TaxRates.getTaxRates();
 
@@ -31,7 +30,30 @@ public class TaxCalculatorService {
             tax += rates[brackets.length - 1] * (income - brackets[brackets.length - 1]);
         }
 
+        // Apply tax threshold based on age group
+        double threshold = TaxRates.getTaxThreshold(ageGroup);
+        if (income <= threshold) {
+            tax = 0; // No tax if income is below the threshold
+        }
+
+        // Apply rebate based on age group
+        double rebate = getRebateForAgeGroup(ageGroup);
+        tax -= rebate;
+
         // Ensure tax is non-negative
         return Math.max(0, tax);
+    }
+
+    private static double getRebateForAgeGroup(int ageGroup) {
+        switch (ageGroup) {
+            case 1: // Under 65
+                return 0; // No rebate for this group
+            case 2: // 65 and older
+                return 9444; // Secondary rebate
+            case 3: // 75 and older
+                return 3145; // Tertiary rebate
+            default:
+                throw new IllegalArgumentException("Invalid age group.");
+        }
     }
 }
